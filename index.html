@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ndhiwa Constituency CDF Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--green:#0a6b3e;--gold:#c9960f;--lgreen:#13964f;--dark:#0d1a12;--offwhite:#f5f2eb;--cream:#faf8f3;--gray:#6b7a6e;--border:#d4e0d8;--card:#ffffff;--shadow:0 4px 24px rgba(10,107,62,0.10);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;}
+.topbar{background:var(--green);color:#ffffffcc;font-size:.78rem;padding:6px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;}
+.topbar a{color:var(--gold);text-decoration:none;margin-left:14px;}
+header{background:var(--dark);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:72px;position:sticky;top:0;z-index:200;border-bottom:3px solid var(--gold);}
+.logo{display:flex;align-items:center;gap:14px;cursor:pointer;}
+.logo-emblem{width:44px;height:44px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--dark);font-weight:900;flex-shrink:0;}
+.logo-text h1{font-family:'Playfair Display',serif;font-size:1rem;color:#fff;font-weight:700;}
+.logo-text span{font-size:.68rem;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;}
+nav{display:flex;gap:3px;}
+nav button{background:none;border:none;color:#ffffffaa;font-family:'DM Sans',sans-serif;font-size:.86rem;font-weight:500;padding:8px 12px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+nav button:hover,nav button.active{background:var(--green);color:#fff;}
+nav button.active{color:var(--gold);}
+.header-cta{background:var(--gold);color:var(--dark);font-weight:700;font-size:.84rem;padding:9px 18px;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;}
+.hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;padding:4px 8px;}
+.mobile-nav{display:none;background:var(--dark);padding:12px;border-bottom:2px solid var(--gold);}
+.mobile-nav button{display:block;width:100%;background:none;border:none;color:#ffffffaa;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:10px 16px;border-radius:6px;cursor:pointer;text-align:left;margin-bottom:2px;}
+.mobile-nav button:hover,.mobile-nav button.active{background:var(--green);color:#fff;}
+
+/* PAGES */
+.page{display:none;}.page.active{display:block;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--dark) 0%,#0a3d22 60%,var(--green) 100%);padding:80px 40px 90px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(201,150,15,.18) 0%,transparent 70%);pointer-events:none;}
+.hero-badge{display:inline-block;background:rgba(201,150,15,.2);border:1px solid var(--gold);color:var(--gold);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px;font-weight:600;}
+.hero h2{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4vw,3.4rem);color:#fff;line-height:1.2;max-width:680px;margin-bottom:18px;}
+.hero h2 em{color:var(--gold);font-style:normal;}
+.hero p{color:rgba(255,255,255,.72);font-size:1rem;max-width:520px;line-height:1.7;margin-bottom:32px;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--dark);font-weight:700;font-size:.9rem;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;transition:transform .15s,opacity .15s;}
+.btn-primary:hover{transform:translateY(-2px);opacity:.9;}
+.btn-outline{background:transparent;color:#fff;font-weight:600;font-size:.9rem;padding:12px 24px;border:2px solid rgba(255,255,255,.4);border-radius:8px;cursor:pointer;transition:border-color .2s;}
+.btn-outline:hover{border-color:#fff;}
+.stats-row{display:flex;gap:0;margin-top:56px;border-top:1px solid rgba(255,255,255,.15);padding-top:36px;flex-wrap:wrap;gap:16px;}
+.stat-item{flex:1;min-width:100px;}
+.stat-item .num{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold);font-weight:900;line-height:1;}
+.stat-item .label{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* QUICK ACTIONS */
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--border);border-bottom:2px solid var(--border);}
+.qa-item{background:var(--card);padding:24px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .2s;border:none;text-align:left;width:100%;}
+.qa-item:hover{background:#f0f7f3;}
+.qa-icon{width:42px;height:42px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.qa-text strong{display:block;font-size:.88rem;font-weight:600;color:var(--dark);margin-bottom:2px;}
+.qa-text span{font-size:.75rem;color:var(--gray);}
+
+/* SECTION */
+.section{padding:56px 40px;}
+.section-eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--dark);line-height:1.2;margin-bottom:28px;}
+.bg-light{background:var(--offwhite);}
+
+/* ANNOUNCEMENTS */
+.announce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.announce-card{background:var(--card);border-radius:12px;padding:22px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.announce-date{font-size:.73rem;color:var(--gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;}
+.announce-card h3{font-size:.96rem;font-weight:700;margin-bottom:7px;color:var(--dark);line-height:1.4;}
+.announce-card p{font-size:.82rem;color:var(--gray);line-height:1.6;}
+.announce-tag{display:inline-block;background:#e8f5ee;color:var(--green);font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+.empty-announce{padding:40px;text-align:center;color:var(--gray);font-size:.9rem;grid-column:1/-1;}
+
+/* PROJECTS */
+.projects-filter{background:#fff;padding:16px 40px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.projects-filter select{padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;cursor:pointer;background:var(--cream);}
+.projects-filter select:focus{border-color:var(--green);}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px;}
+.project-card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);transition:transform .2s,box-shadow .2s;}
+.project-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(10,107,62,.15);}
+.project-img{height:150px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;}
+.project-img.edu{background:linear-gradient(135deg,#e8f5ee,#c3e8d2);}
+.project-img.road{background:linear-gradient(135deg,#fff3d4,#ffe0a0);}
+.project-img.water{background:linear-gradient(135deg,#d4eeff,#a8d8f8);}
+.project-img.health{background:linear-gradient(135deg,#fde8e8,#f8c0c0);}
+.project-img.agri{background:linear-gradient(135deg,#f0ffe0,#d4f0a8);}
+.project-img.energy{background:linear-gradient(135deg,#fffde0,#fff0a0);}
+.project-img.other{background:linear-gradient(135deg,#f0f0f0,#ddd);}
+.status-badge{position:absolute;top:10px;right:10px;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;}
+.s-ongoing{background:#fff3cd;color:#7d5a00;}.s-complete{background:#d1f0e0;color:#0a5c30;}.s-planning{background:#e0e8ff;color:#2040a0;}.s-stalled{background:#fde0e0;color:#9a0000;}
+.project-body{padding:18px;}
+.project-body h3{font-size:.94rem;font-weight:700;margin-bottom:5px;color:var(--dark);}
+.project-body p{font-size:.8rem;color:var(--gray);line-height:1.5;margin-bottom:12px;}
+.prog-wrap{margin-bottom:10px;}
+.prog-label{display:flex;justify-content:space-between;font-size:.74rem;color:var(--gray);margin-bottom:4px;}
+.prog-bar{height:6px;background:#e8ede9;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;background:var(--green);}
+.project-meta{display:flex;gap:10px;font-size:.73rem;color:var(--gray);border-top:1px solid var(--border);padding-top:10px;flex-wrap:wrap;}
+.review-btn{width:100%;background:var(--cream);border:1.5px solid var(--border);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:8px;border-radius:7px;cursor:pointer;margin-top:10px;transition:background .2s;}
+.review-btn:hover{background:#e8f5ee;border-color:var(--green);color:var(--green);}
+.empty-projects{grid-column:1/-1;padding:48px;text-align:center;color:var(--gray);font-size:.9rem;}
+
+/* REVIEW SECTION */
+.reviews-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
+.review-item{background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:.8rem;}
+.review-item .rv-name{font-weight:700;color:var(--dark);margin-bottom:2px;}
+.review-item .rv-text{color:var(--gray);line-height:1.5;}
+.review-item .rv-date{font-size:.7rem;color:var(--gray);margin-top:3px;}
+.review-form{margin-top:10px;display:none;}
+.review-form.open{display:block;}
+.review-form input,.review-form textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:.82rem;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;background:#fff;outline:none;margin-bottom:8px;}
+.review-form input:focus,.review-form textarea:focus{border-color:var(--green);}
+.review-form textarea{min-height:70px;resize:vertical;}
+.review-submit{background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;padding:8px 18px;border:none;border-radius:7px;cursor:pointer;}
+
+/* FORMS */
+.form-page{max-width:800px;margin:0 auto;}
+.form-card{background:var(--card);border-radius:14px;padding:36px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:22px;}
+.form-section-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--green);margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #e0ede6;display:flex;align-items:center;gap:10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:.8rem;font-weight:600;color:var(--dark);}
+label .req{color:#cc2222;margin-left:3px;}
+input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{font-family:'DM Sans',sans-serif;font-size:.86rem;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--dark);transition:border-color .2s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--green);background:#fff;}
+textarea{resize:vertical;min-height:88px;}
+.submit-btn{width:100%;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.96rem;padding:15px;border:none;border-radius:10px;cursor:pointer;transition:background .2s;margin-top:6px;}
+.submit-btn:hover{background:var(--lgreen);}
+.submit-btn:disabled{background:#aaa;cursor:not-allowed;}
+.info-box{background:#e8f5ee;border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:14px 18px;font-size:.82rem;color:#0a4a2a;line-height:1.6;margin-bottom:26px;}
+.info-box strong{display:block;margin-bottom:4px;}
+
+/* STATUS */
+.status-checker{max-width:540px;margin:0 auto;text-align:center;}
+.status-box{background:var(--card);border-radius:14px;padding:40px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:28px;}
+.status-box h3{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:10px;}
+.status-box p{font-size:.88rem;color:var(--gray);margin-bottom:24px;line-height:1.6;}
+.result-card{background:var(--card);border-radius:12px;border:2px solid var(--green);padding:26px;text-align:left;box-shadow:var(--shadow);display:none;}
+.result-card.show{display:block;animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:.86rem;}
+.result-row:last-child{border-bottom:none;}
+.result-row .key{color:var(--gray);}
+.result-row .val{font-weight:600;}
+.badge-approved{background:#d1f0e0;color:#0a5c30;padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:700;}
+.badge-review{background:#fff3cd;color:#7d5a00;padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:700;}
+.badge-pending{background:#e0e8ff;color:#2040a0;padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:700;}
+.badge-rejected{background:#fde0e0;color:#9a0000;padding:4px 12px;border-radius:20px;font-size:.76rem;font-weight:700;}
+
+/* ABOUT / CONTACT */
+.about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start;}
+.about-text h3{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:14px;}
+.about-text p{font-size:.9rem;color:var(--gray);line-height:1.8;margin-bottom:14px;}
+.mandate-list{list-style:none;}
+.mandate-list li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.86rem;line-height:1.5;}
+.team-card{background:var(--card);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);text-align:center;margin-bottom:16px;}
+.team-avatar{width:64px;height:64px;background:var(--green);border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;}
+.team-card h4{font-size:.94rem;font-weight:700;margin-bottom:3px;}
+.team-card span{font-size:.78rem;color:var(--gray);}
+.contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:36px;align-items:start;}
+.contact-info-card{background:var(--green);color:#fff;border-radius:14px;padding:32px;}
+.contact-info-card h3{font-family:'Playfair Display',serif;font-size:1.35rem;margin-bottom:20px;}
+.contact-detail{display:flex;gap:12px;margin-bottom:18px;font-size:.86rem;line-height:1.5;}
+.contact-detail .ci{font-size:1.1rem;flex-shrink:0;margin-top:2px;}
+
+/* FOOTER */
+footer{background:var(--dark);color:rgba(255,255,255,.6);padding:44px 40px 24px;}
+.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:36px;padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.1);flex-wrap:wrap;}
+.footer-brand h3{font-family:'Playfair Display',serif;color:#fff;font-size:1.05rem;margin-bottom:10px;}
+.footer-brand p{font-size:.8rem;line-height:1.7;}
+footer h4{color:var(--gold);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+footer ul{list-style:none;}
+footer ul li{margin-bottom:7px;font-size:.82rem;cursor:pointer;}
+footer ul li:hover{color:#fff;}
+.footer-bottom{display:flex;justify-content:space-between;padding-top:20px;font-size:.76rem;flex-wrap:wrap;gap:6px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:9px;font-size:.86rem;font-weight:600;z-index:9999;opacity:0;transform:translateY(14px);transition:all .3s;pointer-events:none;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-left:4px solid #4caf50;}.toast.error{border-left:4px solid #e53935;}.toast.info{border-left:4px solid var(--gold);}
+
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:768px){
+  .topbar{padding:6px 16px;font-size:.72rem;}
+  header{padding:0 16px;}
+  nav{display:none;}
+  .hamburger{display:block;}
+  .header-cta{display:none;}
+  .hero{padding:48px 20px 56px;}
+  .hero::before{display:none;}
+  .section{padding:40px 20px;}
+  .projects-filter{padding:12px 16px;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-group.full{grid-column:1;}
+  .form-card{padding:22px 18px;}
+  .about-grid,.contact-grid{grid-template-columns:1fr;}
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .status-box{padding:28px 18px;}
+  .stats-row{gap:12px;}
+  .stat-item .num{font-size:1.8rem;}
+  .quick-actions{grid-template-columns:1fr 1fr;}
+  .announce-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .quick-actions{grid-template-columns:1fr;}
+  .footer-top{grid-template-columns:1fr;}
+  .hero h2{font-size:1.7rem;}
+  .projects-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="topbar">
+  <span>📍 Ndhiwa Constituency, Homa Bay County &nbsp;|&nbsp; Fiscal Year 2024/2025</span>
+  <div>
+    <a href="#">CDF Act 2015</a>
+    <a href="#">NGCDF Portal</a>
+    <a href="cdf-admin.html" target="_blank">🔐 Staff Login</a>
+  </div>
+</div>
+
+<header>
+  <div class="logo" onclick="showPage('home')">
+    <div class="logo-emblem">ND</div>
+    <div class="logo-text">
+      <h1>Ndhiwa Constituency</h1>
+      <span>CDF Management Platform</span>
+    </div>
+  </div>
+  <nav id="desktop-nav">
+    <button class="active" onclick="showPage('home');setActive(this)">Home</button>
+    <button onclick="showPage('projects');setActive(this)">Projects</button>
+    <button onclick="showPage('bursary');setActive(this)">Bursary</button>
+    <button onclick="showPage('status');setActive(this)">Check Status</button>
+    <button onclick="showPage('about');setActive(this)">About</button>
+    <button onclick="showPage('contact');setActive(this)">Contact</button>
+  </nav>
+  <button class="hamburger" onclick="toggleMobileNav()">☰</button>
+  <button class="header-cta" onclick="showPage('bursary');setActive(document.querySelectorAll('#desktop-nav button')[2])">Apply for Bursary</button>
+</header>
+
+<div class="mobile-nav" id="mobile-nav">
+  <button onclick="showPage('home');closeMobileNav();setMobileActive(this)">🏠 Home</button>
+  <button onclick="showPage('projects');closeMobileNav();setMobileActive(this)">🏗️ Projects</button>
+  <button onclick="showPage('bursary');closeMobileNav();setMobileActive(this)">🎓 Apply for Bursary</button>
+  <button onclick="showPage('status');closeMobileNav();setMobileActive(this)">🔍 Check Status</button>
+  <button onclick="showPage('about');closeMobileNav();setMobileActive(this)">ℹ️ About</button>
+  <button onclick="showPage('contact');closeMobileNav();setMobileActive(this)">📞 Contact</button>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge">🇰🇪 National Government Constituency Development Fund</div>
+    <h2>Empowering <em>Ndhiwa Constituency</em> Through Transparent Development</h2>
+    <p>Access bursary applications, track ongoing projects, and stay informed about how CDF funds are developing the sugarcane heartland of Ndhiwa.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showPage('bursary');setActive(document.querySelectorAll('#desktop-nav button')[2])">📋 Apply for Bursary</button>
+      <button class="btn-outline" onclick="showPage('projects');setActive(document.querySelectorAll('#desktop-nav button')[1])">🏗️ View Projects</button>
+      <button class="btn-outline" onclick="showPage('status');setActive(document.querySelectorAll('#desktop-nav button')[3])">🔍 Check Application</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="num" id="stat-projects">0</div><div class="label">Active Projects</div></div>
+      <div class="stat-item"><div class="num" id="stat-bursaries">0</div><div class="label">Bursaries Approved</div></div>
+      <div class="stat-item"><div class="num" id="stat-apps">0</div><div class="label">Applications</div></div>
+      <div class="stat-item"><div class="num" id="stat-wards">7</div><div class="label">Wards Covered</div></div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <button class="qa-item" onclick="showPage('bursary');setActive(document.querySelectorAll('#desktop-nav button')[2])">
+      <div class="qa-icon">🎓</div><div class="qa-text"><strong>Apply for Bursary</strong><span>Secondary & Tertiary students</span></div>
+    </button>
+    <button class="qa-item" onclick="showPage('status');setActive(document.querySelectorAll('#desktop-nav button')[3])">
+      <div class="qa-icon">🔎</div><div class="qa-text"><strong>Check Bursary Status</strong><span>Track your application</span></div>
+    </button>
+    <button class="qa-item" onclick="showPage('projects');setActive(document.querySelectorAll('#desktop-nav button')[1])">
+      <div class="qa-icon">🏗️</div><div class="qa-text"><strong>Ongoing Projects</strong><span>Infrastructure & development</span></div>
+    </button>
+    <button class="qa-item" onclick="showPage('contact');setActive(document.querySelectorAll('#desktop-nav button')[5])">
+      <div class="qa-icon">📞</div><div class="qa-text"><strong>Contact Office</strong><span>Reach CDF committee</span></div>
+    </button>
+    <button class="qa-item" onclick="downloadGuide()">
+      <div class="qa-icon">📄</div><div class="qa-text"><strong>Download Guide</strong><span>Bursary application guide</span></div>
+    </button>
+    <button class="qa-item" onclick="showPage('about');setActive(document.querySelectorAll('#desktop-nav button')[4])">
+      <div class="qa-icon">ℹ️</div><div class="qa-text"><strong>About Ndhiwa CDF</strong><span>Our mandate & team</span></div>
+    </button>
+  </div>
+
+  <!-- ANNOUNCEMENTS — from admin -->
+  <div class="section bg-light">
+    <div class="section-eyebrow">Latest Updates</div>
+    <div class="section-title">Announcements & News</div>
+    <div class="announce-grid" id="announcements-grid">
+      <div class="empty-announce">Loading announcements…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROJECTS ══ -->
+<div id="page-projects" class="page">
+  <div style="background:var(--dark);padding:44px 40px;">
+    <div class="section-eyebrow" style="color:var(--gold);">CDF Development</div>
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;font-size:2rem;margin-bottom:10px;">Ongoing & Completed Projects</h2>
+    <p style="color:rgba(255,255,255,.6);">Track all constituency development projects and leave your feedback.</p>
+  </div>
+  <div class="projects-filter">
+    <span style="font-size:.82rem;font-weight:600;color:var(--gray);">Filter:</span>
+    <select id="filter-cat" onchange="renderProjects()">
+      <option value="">All Categories</option>
+      <option>Education</option><option>Roads & Infrastructure</option><option>Water & Sanitation</option>
+      <option>Health</option><option>Agriculture</option><option>Energy</option><option>Other</option>
+    </select>
+    <select id="filter-status" onchange="renderProjects()">
+      <option value="">All Status</option>
+      <option>Ongoing</option><option>Complete</option><option>Planning</option><option>Stalled</option>
+    </select>
+    <select id="filter-ward" onchange="renderProjects()">
+      <option value="">All Wards</option>
+      <option>Kanyikela</option><option>Kanyadoto</option><option>Kwabwai</option><option>Kologi</option>
+      <option>Kosewe</option><option>South Kabuoch</option><option>North Kabuoch</option>
+    </select>
+  </div>
+  <div class="section">
+    <div class="projects-grid" id="projects-grid">
+      <div class="empty-projects">Loading projects…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BURSARY ══ -->
+<div id="page-bursary" class="page">
+  <div style="background:var(--dark);padding:44px 40px;">
+    <div class="section-eyebrow" style="color:var(--gold);">Education Support</div>
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;font-size:2rem;margin-bottom:10px;">Bursary Application Form</h2>
+    <p style="color:rgba(255,255,255,.6);">Applications open. Deadline: <strong style="color:var(--gold)">April 30, 2025</strong></p>
+  </div>
+  <div class="section">
+    <div class="form-page">
+      <div class="info-box"><strong>📌 Before you apply:</strong> Bursaries are for Form 1–4, TVET, and university students who are residents of Ndhiwa Constituency. Attach: birth certificate, school admission letter, fee statement, and parent/guardian national ID.</div>
+      <form id="bursary-form" onsubmit="submitBursary(event)">
+        <div class="form-card">
+          <div class="form-section-title">👤 Student Information</div>
+          <div class="form-grid">
+            <div class="form-group"><label>First Name <span class="req">*</span></label><input type="text" id="f-fname" required/></div>
+            <div class="form-group"><label>Last Name <span class="req">*</span></label><input type="text" id="f-lname" required/></div>
+            <div class="form-group"><label>Date of Birth <span class="req">*</span></label><input type="text" id="f-dob" placeholder="DD/MM/YYYY" required/></div>
+            <div class="form-group"><label>National ID / Birth Cert No. <span class="req">*</span></label><input type="text" id="f-idno" required/></div>
+            <div class="form-group"><label>Gender <span class="req">*</span></label><select id="f-gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+            <div class="form-group"><label>Ward <span class="req">*</span></label>
+              <select id="f-ward" required><option value="">Select ward</option>
+                <option>Kanyikela</option><option>Kanyadoto</option><option>Kwabwai</option><option>Kologi</option>
+                <option>Kosewe</option><option>South Kabuoch</option><option>North Kabuoch</option>
+              </select>
+            </div>
+            <div class="form-group full"><label>Village / Sub-location <span class="req">*</span></label><input type="text" id="f-village" required/></div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="form-section-title">🎓 Education Details</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Level <span class="req">*</span></label>
+              <select id="f-level" required><option value="">Select</option><option>Secondary – Form 1</option><option>Secondary – Form 2</option><option>Secondary – Form 3</option><option>Secondary – Form 4</option><option>TVET / Vocational</option><option>University / Tertiary</option></select>
+            </div>
+            <div class="form-group"><label>Institution Name <span class="req">*</span></label><input type="text" id="f-school" required/></div>
+            <div class="form-group"><label>Admission / Reg. Number <span class="req">*</span></label><input type="text" id="f-admno" required/></div>
+            <div class="form-group"><label>Annual School Fees (KES) <span class="req">*</span></label><input type="number" id="f-fees" required/></div>
+            <div class="form-group"><label>Amount Applied For (KES) <span class="req">*</span></label><input type="number" id="f-amount" required/></div>
+            <div class="form-group"><label>Previous CDF Bursary?</label><select id="f-prev"><option value="No">No – First time</option><option value="Yes-2024">Yes – 2024</option><option value="Yes-2023">Yes – 2023</option><option value="Yes-Before">Before 2023</option></select></div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="form-section-title">👨‍👩‍👦 Parent / Guardian Information</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" id="f-pgname" required/></div>
+            <div class="form-group"><label>Relationship <span class="req">*</span></label><select id="f-rel" required><option value="">Select</option><option>Father</option><option>Mother</option><option>Guardian</option><option>Sibling</option><option>Other</option></select></div>
+            <div class="form-group"><label>National ID Number <span class="req">*</span></label><input type="text" id="f-pgid" required/></div>
+            <div class="form-group"><label>Phone Number <span class="req">*</span></label><input type="tel" id="f-phone" placeholder="07XX XXX XXX" required/></div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="f-email" placeholder="Optional"/></div>
+            <div class="form-group"><label>Monthly Income Range</label><select id="f-income"><option value="">Select</option><option>Below KES 5,000</option><option>KES 5,001–15,000</option><option>KES 15,001–30,000</option><option>Above KES 30,000</option></select></div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="form-section-title">📎 Declaration</div>
+          <div class="form-grid">
+            <div class="form-group full"><label>Special Circumstances</label><textarea id="f-notes" placeholder="Orphan, disability, single-parent household, etc."></textarea></div>
+            <div class="form-group full">
+              <div style="background:var(--offwhite);border-radius:8px;padding:12px 14px;font-size:.82rem;color:var(--gray);line-height:1.7;border:1.5px solid var(--border);">I declare that the information provided is true and correct. I understand that providing false information will lead to disqualification and recovery of any funds disbursed.</div>
+              <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:400;cursor:pointer;"><input type="checkbox" id="f-agree" required> I agree to the declaration and Ndhiwa CDF bursary terms</label>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">✅ Submit Bursary Application</button>
+        </div>
+      </form>
+      <div id="bursary-success" style="display:none;background:#d1f0e0;border:2px solid var(--green);border-radius:14px;padding:32px;text-align:center;">
+        <div style="font-size:2.8rem;margin-bottom:12px;">✅</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--green);margin-bottom:10px;">Application Submitted!</h3>
+        <p style="color:#0a4a2a;line-height:1.7;margin-bottom:18px;">Your reference number is <strong id="ref-number" style="font-size:1.1rem;"></strong>. Keep this to check your status. You will be notified once a decision is made.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <button class="submit-btn" style="width:auto;padding:11px 24px;" onclick="downloadReceipt()">📄 Download Receipt</button>
+          <button class="submit-btn" style="width:auto;padding:11px 24px;background:var(--dark);" onclick="showPage('status');setActive(document.querySelectorAll('#desktop-nav button')[3])">🔍 Check Status</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATUS ══ -->
+<div id="page-status" class="page">
+  <div style="background:var(--dark);padding:44px 40px;">
+    <div class="section-eyebrow" style="color:var(--gold);">Track Your Application</div>
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;font-size:2rem;margin-bottom:10px;">Check Bursary Status</h2>
+    <p style="color:rgba(255,255,255,.6);">Enter your details to securely check your own application status.</p>
+  </div>
+  <div class="section">
+    <div class="status-checker">
+      <div class="status-box">
+        <div style="font-size:2.8rem;margin-bottom:14px;">🔐</div>
+        <h3>Check Your Status</h3>
+        <p>For your privacy, enter <strong>both</strong> your reference number (or National ID) <strong>and</strong> the phone number used during application.</p>
+
+        <div style="background:#e8f5ee;border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:12px 16px;font-size:.82rem;color:#0a4a2a;margin-bottom:18px;text-align:left;">
+          🔒 <strong>Privacy protected</strong> — Only you can view your own application. Both fields must match our records.
+        </div>
+
+        <label style="display:block;text-align:left;font-size:.8rem;font-weight:600;margin-bottom:5px;color:var(--dark);">Reference Number or National ID <span style="color:#cc2222;">*</span></label>
+        <input type="text" id="status-input" placeholder="e.g. ND-2025-12345 or your National ID"
+          style="font-size:.9rem;padding:12px 16px;border-radius:10px;border:2px solid var(--border);background:var(--cream);width:100%;margin-bottom:14px;outline:none;font-family:'DM Sans',sans-serif;"/>
+
+        <label style="display:block;text-align:left;font-size:.8rem;font-weight:600;margin-bottom:5px;color:var(--dark);">Guardian / Parent Phone Number <span style="color:#cc2222;">*</span></label>
+        <input type="tel" id="status-phone" placeholder="Phone number used during application e.g. 0712345678"
+          style="font-size:.9rem;padding:12px 16px;border-radius:10px;border:2px solid var(--border);background:var(--cream);width:100%;margin-bottom:18px;outline:none;font-family:'DM Sans',sans-serif;"/>
+
+        <button class="submit-btn" id="status-btn" onclick="checkStatus()" style="margin-top:0;">🔍 Check My Status</button>
+      </div>
+      <div class="result-card" id="result-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div><div style="font-size:.73rem;color:var(--gray);margin-bottom:3px;">REFERENCE NUMBER</div><strong id="result-ref" style="font-family:'Playfair Display',serif;font-size:1.05rem;"></strong></div>
+          <span id="result-badge"></span>
+        </div>
+        <div class="result-row"><span class="key">Student Name</span><span class="val" id="r-name"></span></div>
+        <div class="result-row"><span class="key">Institution</span><span class="val" id="r-inst"></span></div>
+        <div class="result-row"><span class="key">Level</span><span class="val" id="r-level"></span></div>
+        <div class="result-row"><span class="key">Amount Applied</span><span class="val" id="r-amount"></span></div>
+        <div class="result-row"><span class="key">Amount Approved</span><span class="val" id="r-approved"></span></div>
+        <div class="result-row"><span class="key">Status</span><span class="val" id="r-status"></span></div>
+        <div class="result-row"><span class="key">Last Updated</span><span class="val" id="r-date"></span></div>
+        <div id="r-note" style="margin-top:12px;background:#fff8e0;border-radius:8px;padding:11px;font-size:.81rem;color:#7d5a00;line-height:1.6;display:none;"></div>
+      </div>
+      <div style="margin-top:24px;text-align:left;background:var(--card);border-radius:12px;padding:22px;border:1px solid var(--border);">
+        <h4 style="font-size:.88rem;font-weight:700;margin-bottom:12px;">📖 Status Meanings</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:center;"><span class="badge-pending">Pending</span><span style="font-size:.82rem;color:var(--gray);">Received, awaiting committee review</span></div>
+          <div style="display:flex;gap:10px;align-items:center;"><span class="badge-review">Under Review</span><span style="font-size:.82rem;color:var(--gray);">Being reviewed and verified</span></div>
+          <div style="display:flex;gap:10px;align-items:center;"><span class="badge-approved">Approved</span><span style="font-size:.82rem;color:var(--gray);">Funds will be disbursed to your institution</span></div>
+          <div style="display:flex;gap:10px;align-items:center;"><span class="badge-rejected">Not Approved</span><span style="font-size:.82rem;color:var(--gray);">Contact CDF office for reasons</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ABOUT ══ -->
+<div id="page-about" class="page">
+  <div style="background:var(--dark);padding:44px 40px;">
+    <div class="section-eyebrow" style="color:var(--gold);">Who We Are</div>
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;font-size:2rem;margin-bottom:10px;">About Ndhiwa CDF</h2>
+  </div>
+  <div class="section">
+    <div class="about-grid">
+      <div class="about-text">
+        <h3>Constituency Development Fund – Ndhiwa Constituency</h3>
+        <p>The Constituency Development Fund is established under the NG-CDF Act of 2015, aimed at ensuring fair distribution of public resources at constituency level across Kenya.</p>
+        <p>Ndhiwa Constituency CDF Committee identifies, prioritizes, implements, and monitors development projects within the constituency and administers bursaries for needy students across all 7 wards.</p>
+        <h4 style="font-size:.96rem;font-weight:700;color:var(--green);margin:20px 0 10px;">Our Core Mandate</h4>
+        <ul class="mandate-list">
+          <li><span>🏗️</span><span>Finance and oversee community infrastructure projects</span></li>
+          <li><span>🎓</span><span>Award bursaries to needy but deserving students</span></li>
+          <li><span>🌱</span><span>Support community-driven livelihood initiatives</span></li>
+          <li><span>📊</span><span>Ensure transparency and accountability in fund use</span></li>
+          <li><span>🗣️</span><span>Facilitate public participation in project selection</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="team-card"><div class="team-avatar">👨</div><h4>Hon. Martin Owino</h4><span>Member of Parliament – Ndhiwa Constituency</span></div>
+        <div class="team-card"><div class="team-avatar">👩</div><h4>CDF Committee Chairperson</h4><span>NG-CDF Committee Chair</span></div>
+        <div class="team-card"><div class="team-avatar">👨</div><h4>CDF Manager</h4><span>Head of Constituency Office</span></div>
+        <div style="background:#e8f5ee;border-radius:10px;padding:18px;font-size:.82rem;color:#0a4a2a;line-height:1.7;">
+          <strong style="display:block;margin-bottom:5px;">📅 FY 2024/2025 Budget</strong>
+          Total allocation: <strong>KES 85,400,000</strong><br>
+          Bursary (15%): <strong>KES 12,810,000</strong><br>
+          Projects (85%): <strong>KES 72,590,000</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONTACT ══ -->
+<div id="page-contact" class="page">
+  <div style="background:var(--dark);padding:44px 40px;">
+    <div class="section-eyebrow" style="color:var(--gold);">Get In Touch</div>
+    <h2 style="font-family:'Playfair Display',serif;color:#fff;font-size:2rem;margin-bottom:10px;">Contact the CDF Office</h2>
+  </div>
+  <div class="section">
+    <div class="contact-grid">
+      <div class="contact-info-card">
+        <h3>Office Information</h3>
+        <div class="contact-detail"><span class="ci">📍</span><span>Ndhiwa CDF Office<br>Ndhiwa Town, Homa Bay County<br>P.O. Box 208, Ndhiwa</span></div>
+        <div class="contact-detail"><span class="ci">📞</span><span>0791186172</span></div>
+        <div class="contact-detail"><span class="ci">✉️</span><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7e140b0d0a171d1b1f0417043e19131f1712501d1113">[email&#160;protected]</a></span></div>
+        <div class="contact-detail"><span class="ci">🕒</span><span>Monday – Friday · 8:00 AM – 5:00 PM</span></div>
+        <div style="margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.2);">
+          <div style="font-size:.76rem;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Complaints & Whistleblowing</div>
+          <div style="font-size:.82rem;">NG-CDF Board toll-free: <strong>0800 724 447</strong></div>
+        </div>
+      </div>
+      <div class="form-card" style="margin-bottom:0;">
+        <div class="form-section-title">✉️ Send Us a Message</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" id="c-name"/></div>
+          <div class="form-group"><label>Phone <span class="req">*</span></label><input type="tel" id="c-phone" placeholder="07XX XXX XXX"/></div>
+          <div class="form-group full"><label>Email</label><input type="email" id="c-email" placeholder="Optional"/></div>
+          <div class="form-group full"><label>Subject <span class="req">*</span></label>
+            <select id="c-subject"><option value="">Select</option><option>Bursary Enquiry</option><option>Project Status</option><option>New Project Proposal</option><option>Complaint / Feedback</option><option>Other</option></select>
+          </div>
+          <div class="form-group full"><label>Message <span class="req">*</span></label><textarea id="c-msg" style="min-height:110px;"></textarea></div>
+        </div>
+        <button class="submit-btn" style="margin-top:10px;" onclick="submitContact()">📤 Send Message</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <h3>Ndhiwa Constituency CDF</h3>
+      <p>The National Government Constituency Development Fund for Ndhiwa Constituency. Committed to equitable development and education support for all 7 wards.</p>
+    </div>
+    <div><h4>Quick Links</h4><ul>
+      <li onclick="showPage('bursary')">Apply for Bursary</li>
+      <li onclick="showPage('status')">Check Application</li>
+      <li onclick="showPage('projects')">View Projects</li>
+      <li onclick="showPage('contact')">Contact Us</li>
+    </ul></div>
+    <div><h4>Our Wards</h4><ul>
+      <li>Kanyikela</li><li>Kanyadoto</li><li>Kwabwai</li><li>Kologi</li>
+      <li>Kosewe</li><li>South Kabuoch</li><li>North Kabuoch</li>
+    </ul></div>
+    <div><h4>Government Links</h4><ul>
+      <li>NG-CDF Board</li><li>National Assembly</li><li>e-Citizen Portal</li><li>Homa Bay County</li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Ndhiwa Constituency CDF. All rights reserved.</span>
+    <span>Serving the people of Ndhiwa · Homa Bay County</span>
+  </div>
+</footer>
+
+<script>
+// All functions attached to window so inline onclick handlers always find them
+(function() {
+
+// ── DATA ──
+function getData(key, fb) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fb; } catch { return fb; } }
+function saveData(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+
+// ── NAVIGATION ──
+window.showPage = function(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (id === 'projects') window.renderProjects();
+  if (id === 'home') { renderAnnouncements(); updateStats(); }
+};
+window.setActive = function(btn) {
+  document.querySelectorAll('#desktop-nav button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+};
+window.toggleMobileNav = function() {
+  const mn = document.getElementById('mobile-nav');
+  mn.style.display = mn.style.display === 'block' ? 'none' : 'block';
+};
+window.closeMobileNav = function() { document.getElementById('mobile-nav').style.display = 'none'; };
+window.setMobileActive = function(btn) {
+  document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+};
+
+// ── TOAST ──
+function showToast(msg, type, dur) {
+  type = type || 'info'; dur = dur || 3200;
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, dur);
+}
+
+// ── STATS ──
+function updateStats() {
+  const projects = getData('cdf_projects', []);
+  const apps = getData('cdf_applications', []);
+  document.getElementById('stat-projects').textContent = projects.length;
+  document.getElementById('stat-bursaries').textContent = apps.filter(function(a) { return a.status === 'Approved'; }).length;
+  document.getElementById('stat-apps').textContent = apps.length;
+}
+
+// ── ANNOUNCEMENTS ──
+function renderAnnouncements() {
+  const items = getData('cdf_announcements', []);
+  const grid = document.getElementById('announcements-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-announce">No announcements yet. Check back soon.</div>';
+    return;
+  }
+  grid.innerHTML = items.slice().reverse().map(function(a) {
+    return '<div class="announce-card">' +
+      '<div class="announce-tag">' + (a.tag || 'Notice') + '</div>' +
+      '<div class="announce-date">' + (a.date || '') + '</div>' +
+      '<h3>' + a.title + '</h3>' +
+      '<p>' + a.body + '</p>' +
+      '</div>';
+  }).join('');
+}
+
+// ── PROJECTS ──
+var CAT_ICONS = { 'Education':'🏫','Roads & Infrastructure':'🛣️','Water & Sanitation':'💧','Health':'🏥','Agriculture':'🌾','Energy':'⚡','Other':'🏗️' };
+var CAT_CLASS = { 'Education':'edu','Roads & Infrastructure':'road','Water & Sanitation':'water','Health':'health','Agriculture':'agri','Energy':'energy','Other':'other' };
+var BAR_COLOR = { 'Complete':'#4488cc','Stalled':'#e05050','Ongoing':'var(--green)','Planning':'var(--gold)' };
+var STATUS_CLS = { 'Ongoing':'s-ongoing','Complete':'s-complete','Planning':'s-planning','Stalled':'s-stalled' };
+
+window.renderProjects = function() {
+  var projects = getData('cdf_projects', []);
+  var catF = document.getElementById('filter-cat').value;
+  var statusF = document.getElementById('filter-status').value;
+  var wardF = document.getElementById('filter-ward').value;
+  var filtered = projects.filter(function(p) {
+    return (!catF || p.cat === catF) && (!statusF || p.status === statusF) && (!wardF || p.ward === wardF);
+  });
+  var grid = document.getElementById('projects-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-projects">No projects found. Try changing your filters.</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(function(p) {
+    var pct = Math.min(Number(p.progress) || 0, 100);
+    var reviews = getData('cdf_reviews_' + p.id, []);
+    var reviewsHtml = reviews.length
+      ? reviews.slice(-3).map(function(r) {
+          return '<div class="review-item"><div class="rv-name">' + r.name + '</div><div class="rv-text">' + r.text + '</div><div class="rv-date">' + r.date + '</div></div>';
+        }).join('')
+      : '<div style="font-size:.78rem;color:var(--gray);padding:6px 0;">No reviews yet. Be the first!</div>';
+    return '<div class="project-card">' +
+      '<div class="project-img ' + (CAT_CLASS[p.cat] || 'other') + '">' + (CAT_ICONS[p.cat] || '🏗️') +
+        '<span class="status-badge ' + (STATUS_CLS[p.status] || 's-planning') + '">' + p.status + '</span>' +
+      '</div>' +
+      '<div class="project-body">' +
+        '<h3>' + p.name + '</h3>' +
+        '<p>' + (p.desc || p.cat + ' project in ' + p.ward) + '</p>' +
+        '<div class="prog-wrap">' +
+          '<div class="prog-label"><span>Completion</span><span>' + pct + '%</span></div>' +
+          '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%;background:' + (BAR_COLOR[p.status] || 'var(--green)') + ';"></div></div>' +
+        '</div>' +
+        '<div class="project-meta">' +
+          (p.end ? '<span>📅 ' + p.end + '</span>' : '') +
+          '<span>💰 KES ' + (Number(p.budget || 0) / 1e6).toFixed(1) + 'M</span>' +
+          '<span>📍 ' + p.ward + '</span>' +
+        '</div>' +
+        '<button class="review-btn" onclick="window.toggleReview(\'' + p.id + '\')">💬 Leave a Review / Comment</button>' +
+        '<div class="reviews-section">' +
+          '<div id="reviews-' + p.id + '">' + reviewsHtml + '</div>' +
+          '<div class="review-form" id="rform-' + p.id + '">' +
+            '<input type="text" id="rname-' + p.id + '" placeholder="Your name (required)"/>' +
+            '<textarea id="rtext-' + p.id + '" placeholder="Share your thoughts about this project…"></textarea>' +
+            '<button class="review-submit" onclick="window.submitReview(\'' + p.id + '\')">Submit Review</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+};
+
+window.toggleReview = function(pid) {
+  var form = document.getElementById('rform-' + pid);
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) document.getElementById('rname-' + pid).focus();
+};
+
+window.submitReview = function(pid) {
+  var name = document.getElementById('rname-' + pid).value.trim();
+  var text = document.getElementById('rtext-' + pid).value.trim();
+  if (!name || !text) { showToast('Please enter your name and review', 'error'); return; }
+  var reviews = getData('cdf_reviews_' + pid, []);
+  reviews.push({ name: name, text: text, date: new Date().toLocaleDateString('en-KE', { day:'numeric', month:'short', year:'numeric' }) });
+  saveData('cdf_reviews_' + pid, reviews);
+  document.getElementById('rname-' + pid).value = '';
+  document.getElementById('rtext-' + pid).value = '';
+  document.getElementById('rform-' + pid).classList.remove('open');
+  showToast('✅ Review submitted! Thank you.', 'success');
+  window.renderProjects();
+};
+
+// ── BURSARY ──
+var lastSubmission = null;
+function generateRef() { return 'ND-2025-' + String(Math.floor(10000 + Math.random() * 90000)); }
+
+window.submitBursary = function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting…';
+  var ref = generateRef();
+  var d = {
+    _id: 'app-' + Date.now(), ref: ref, status: 'Pending',
+    firstName: document.getElementById('f-fname').value.trim(),
+    lastName: document.getElementById('f-lname').value.trim(),
+    dob: document.getElementById('f-dob').value.trim(),
+    idNo: document.getElementById('f-idno').value.trim(),
+    gender: document.getElementById('f-gender').value,
+    ward: document.getElementById('f-ward').value,
+    village: document.getElementById('f-village').value.trim(),
+    level: document.getElementById('f-level').value,
+    school: document.getElementById('f-school').value.trim(),
+    admNo: document.getElementById('f-admno').value.trim(),
+    fees: document.getElementById('f-fees').value,
+    amountApplied: document.getElementById('f-amount').value,
+    amountApproved: '',
+    previousBursary: document.getElementById('f-prev').value,
+    guardianName: document.getElementById('f-pgname').value.trim(),
+    guardianRel: document.getElementById('f-rel').value,
+    guardianId: document.getElementById('f-pgid').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    income: document.getElementById('f-income').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    submittedAt: new Date().toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' }),
+    submittedTimestamp: Date.now()
+  };
+  lastSubmission = d;
+  var apps = getData('cdf_applications', []);
+  apps.push(d);
+  saveData('cdf_applications', apps);
+  document.getElementById('ref-number').textContent = ref;
+  document.getElementById('bursary-form').style.display = 'none';
+  var suc = document.getElementById('bursary-success');
+  suc.style.display = 'block';
+  suc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  btn.disabled = false; btn.innerHTML = '✅ Submit Bursary Application';
+  showToast('✅ Application submitted! Ref: ' + ref, 'success', 5000);
+  updateStats();
+};
+
+// ── STATUS CHECKER (ref + phone required) ──
+window.checkStatus = function() {
+  var raw = document.getElementById('status-input').value.trim();
+  var phoneInput = document.getElementById('status-phone').value.trim().replace(/\s/g, '');
+  if (!raw) { showToast('Please enter your reference number or National ID', 'error'); return; }
+  if (!phoneInput) { showToast('Please enter the phone number used during application', 'error'); return; }
+  var btn = document.getElementById('status-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Verifying…';
+  var apps = getData('cdf_applications', []);
+  var found = apps.find(function(a) { return a.ref === raw || a.idNo === raw || a.ref === 'ND-2025-' + raw; });
+  var card = document.getElementById('result-card');
+  card.classList.add('show');
+  if (!found) {
+    card.style.borderColor = '#cc4444';
+    document.getElementById('result-ref').textContent = raw;
+    document.getElementById('result-badge').className = 'badge-rejected';
+    document.getElementById('result-badge').textContent = 'Not Found';
+    ['r-name','r-inst','r-level','r-amount','r-approved','r-status','r-date'].forEach(function(id) { document.getElementById(id).textContent = '—'; });
+    var note = document.getElementById('r-note');
+    note.style.display = 'block';
+    note.textContent = '⚠️ No application found. Please check and try again, or visit the Ndhiwa CDF office.';
+  } else {
+    var normalize = function(p) { return String(p).replace(/\s/g,'').replace(/^0/,'254').replace(/^\+254/,'254').replace(/^254/,'254'); };
+    var last9 = function(p) { return normalize(p).slice(-9); };
+    if (last9(found.phone || '') !== last9(phoneInput)) {
+      card.style.borderColor = '#cc4444';
+      document.getElementById('result-ref').textContent = raw;
+      document.getElementById('result-badge').className = 'badge-rejected';
+      document.getElementById('result-badge').textContent = 'Verification Failed';
+      ['r-name','r-inst','r-level','r-amount','r-approved','r-status','r-date'].forEach(function(id) { document.getElementById(id).textContent = '—'; });
+      var note2 = document.getElementById('r-note');
+      note2.style.display = 'block';
+      note2.textContent = '🔒 The phone number does not match our records. Please use the phone number provided during application, or visit the Ndhiwa CDF office.';
+    } else {
+      card.style.borderColor = 'var(--green)';
+      var badgeMap = { 'Pending':'badge-pending','Under Review':'badge-review','Approved':'badge-approved','Not Approved':'badge-rejected' };
+      var noteMap = {
+        'Pending': '📋 Your application has been received and is queued for committee review.',
+        'Under Review': '⏳ Your application is being reviewed. Ensure your institution has submitted the fee statement to our office.',
+        'Approved': '✅ Congratulations! Your bursary has been approved. Funds will be disbursed directly to your institution.',
+        'Not Approved': '❌ Your application was unsuccessful this cycle. Please visit the CDF office at Ndhiwa Town for more details.'
+      };
+      document.getElementById('result-ref').textContent = found.ref;
+      var badge = document.getElementById('result-badge');
+      badge.className = badgeMap[found.status] || 'badge-pending';
+      badge.textContent = found.status;
+      document.getElementById('r-name').textContent = found.firstName + ' ' + found.lastName;
+      document.getElementById('r-inst').textContent = found.school || '—';
+      document.getElementById('r-level').textContent = found.level || '—';
+      document.getElementById('r-amount').textContent = 'KES ' + Number(found.amountApplied || 0).toLocaleString();
+      document.getElementById('r-approved').textContent = found.amountApproved ? 'KES ' + Number(found.amountApproved).toLocaleString() : '—';
+      document.getElementById('r-status').textContent = found.status;
+      document.getElementById('r-date').textContent = found.submittedAt || '—';
+      var note3 = document.getElementById('r-note');
+      note3.style.display = 'block';
+      note3.textContent = noteMap[found.status] || '';
+    }
+  }
+  card.scrollIntoView({ behavior:'smooth', block:'center' });
+  btn.disabled = false; btn.innerHTML = '🔍 Check My Status';
+};
+
+// ── CONTACT ──
+window.submitContact = function() {
+  var name = document.getElementById('c-name').value.trim();
+  var phone = document.getElementById('c-phone').value.trim();
+  var msg = document.getElementById('c-msg').value.trim();
+  if (!name || !phone || !msg) { showToast('Please fill in all required fields', 'error'); return; }
+  var msgs = getData('cdf_messages', []);
+  msgs.push({
+    id: 'msg-' + Date.now(), name: name, phone: phone,
+    email: document.getElementById('c-email').value.trim(),
+    subject: document.getElementById('c-subject').value,
+    message: msg,
+    date: new Date().toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' }),
+    read: false
+  });
+  saveData('cdf_messages', msgs);
+  showToast('✅ Message sent! We will respond within 2 working days.', 'success');
+  ['c-name','c-phone','c-email','c-msg'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('c-subject').selectedIndex = 0;
+};
+
+// ── PDF RECEIPT ──
+window.downloadReceipt = function() {
+  if (!lastSubmission) { showToast('No submission data available', 'error'); return; }
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF();
+  var d = lastSubmission;
+  doc.setFillColor(10,107,62); doc.rect(0,0,210,34,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(17); doc.setFont('helvetica','bold');
+  doc.text('Ndhiwa Constituency CDF',105,14,{align:'center'});
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text('Bursary Application Receipt',105,24,{align:'center'});
+  doc.setFillColor(201,150,15); doc.rect(20,40,170,13,'F');
+  doc.setTextColor(20,20,20); doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('Reference: ' + d.ref,105,49,{align:'center'});
+  doc.setTextColor(50,50,50); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  var y = 68;
+  var rows = [['Student Name',d.firstName+' '+d.lastName],['ID / Birth Cert',d.idNo],['Ward',d.ward],['Level',d.level],['Institution',d.school],['Amount Applied','KES '+Number(d.amountApplied).toLocaleString()],['Guardian',d.guardianName],['Phone',d.phone],['Status',d.status],['Submitted',d.submittedAt]];
+  rows.forEach(function(row,i) {
+    if(i%2===0){doc.setFillColor(245,242,235);doc.rect(20,y-5,170,10,'F');}
+    doc.setFont('helvetica','bold'); doc.text(row[0]+':',25,y);
+    doc.setFont('helvetica','normal'); doc.text(String(row[1]||'—'),90,y); y+=12;
+  });
+  doc.setFillColor(13,26,18); doc.rect(0,274,210,23,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(9);
+  doc.text('Ndhiwa CDF Office · 0791186172 · justiceaziz@gmail.com',105,283,{align:'center'});
+  doc.text('P.O. Box 208, Ndhiwa · Homa Bay County',105,291,{align:'center'});
+  doc.save('Ndhiwa_CDF_Receipt_'+d.ref+'.pdf');
+  showToast('📄 Receipt downloaded!','success');
+};
+
+window.downloadGuide = function() {
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF();
+  doc.setFillColor(10,107,62); doc.rect(0,0,210,38,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('Ndhiwa CDF Bursary Guide 2025',105,18,{align:'center'});
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text('Ndhiwa Constituency · Homa Bay County',105,30,{align:'center'});
+  doc.setTextColor(20,20,20); var y=52;
+  var sections = [
+    ['Who Can Apply?',['Students in Form 1-4 at a public secondary school','Students at accredited TVET institutions','Students at public universities','Must be a resident of Ndhiwa Constituency']],
+    ['Required Documents',['National ID or Birth Certificate (student)','Parent/Guardian National ID (copy)','School Admission Letter','Current Fee Statement (official, stamped)']],
+    ['How to Apply',['1. Visit the website and click Apply for Bursary','2. Fill in all required fields accurately','3. Submit - you receive a reference number','4. Track status using your reference number']],
+    ['Important Dates',['Application Opens: March 1, 2025','Application Deadline: April 30, 2025','Results: June 2025','Disbursement: July 2025']],
+    ['Contact',['0791186172','justiceaziz@gmail.com','Ndhiwa CDF Office, Ndhiwa Town','Mon-Fri, 8:00 AM - 5:00 PM']]
+  ];
+  sections.forEach(function(s) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(10,107,62);
+    doc.text(s[0],20,y); y+=8;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,50,50);
+    s[1].forEach(function(item){doc.text('• '+item,25,y); y+=7;}); y+=5;
+  });
+  doc.save('Ndhiwa_CDF_Bursary_Guide_2025.pdf');
+  showToast('Guide downloaded!','success');
+};
+
+// ── INIT ──
+window.addEventListener('load', function() {
+  updateStats();
+  renderAnnouncements();
+});
+
+})(); // end IIFE
+</script>
+</body>
+</html>
