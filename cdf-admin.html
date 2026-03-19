@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ndhiwa CDF – Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--green:#0a6b3e;--gold:#c9960f;--lgreen:#13964f;--dark:#0d1a12;--sidebar:#0f2018;--cream:#f5f2eb;--gray:#6b7a6e;--border:#d4e0d8;--card:#ffffff;--shadow:0 2px 16px rgba(10,107,62,0.09);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#f0f4f1;color:var(--dark);min-height:100vh;}
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--dark) 0%,#0a3d22 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:#fff;border-radius:16px;padding:48px 44px;width:380px;text-align:center;border-top:4px solid var(--gold);box-shadow:0 24px 60px rgba(0,0,0,0.3);}
+.login-emblem{width:64px;height:64px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--dark);font-weight:700;margin:0 auto 16px;}
+.login-box h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:4px;}
+.login-box p{font-size:.84rem;color:var(--gray);margin-bottom:28px;}
+.login-box input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.92rem;margin-bottom:12px;outline:none;background:var(--cream);}
+.login-box input:focus{border-color:var(--green);background:#fff;}
+.login-btn{width:100%;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;padding:13px;border:none;border-radius:8px;cursor:pointer;}
+.login-btn:hover{background:var(--lgreen);}
+.login-error{color:#c0392b;font-size:.82rem;margin-top:10px;display:none;padding:8px;background:#fde0e0;border-radius:6px;}
+.login-hint{font-size:.75rem;color:var(--gray);margin-top:14px;padding:10px;background:var(--cream);border-radius:6px;}
+#app{display:none;min-height:100vh;}
+.app-inner{display:flex;min-height:100vh;}
+.sidebar{width:240px;background:var(--sidebar);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-logo h2{font-family:'Playfair Display',serif;color:#fff;font-size:.98rem;}
+.sidebar-logo span{font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;}
+.sidebar-nav{padding:12px 0;flex:1;}
+.nav-section{padding:10px 20px 4px;font-size:.64rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.12em;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:rgba(255,255,255,.65);font-size:.86rem;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-item.active{background:var(--green);color:#fff;}
+.sidebar-bottom{padding:16px;border-top:1px solid rgba(255,255,255,.08);}
+.logout-btn{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.5);font-size:.84rem;cursor:pointer;padding:8px 4px;width:100%;background:none;border:none;}
+.logout-btn:hover{color:#fff;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:#fff;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.topbar h1{font-size:1rem;font-weight:700;}
+.admin-badge{background:#e8f5ee;color:var(--green);font-size:.76rem;font-weight:700;padding:4px 12px;border-radius:20px;}
+#page-content{padding:28px;flex:1;overflow-y:auto;max-height:calc(100vh - 58px);}
+.tab-page{display:none;animation:fadeIn .2s ease;}
+.tab-page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;}
+.stat-card{background:var(--card);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.stat-card .sc-num{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;line-height:1;}
+.stat-card .sc-label{font-size:.76rem;color:var(--gray);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-card .sc-sub{font-size:.76rem;margin-top:5px;font-weight:600;}
+.stat-card.green{border-top:3px solid var(--green);}.stat-card.gold{border-top:3px solid var(--gold);}.stat-card.blue{border-top:3px solid #4488cc;}.stat-card.red{border-top:3px solid #e05050;}
+.table-wrap{background:var(--card);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
+.table-header{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+.table-header h3{font-size:.98rem;font-weight:700;}
+.table-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tbl-search{padding:7px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;width:180px;}
+.tbl-search:focus{border-color:var(--green);}
+.tbl-filter{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;cursor:pointer;}
+.btn-export{background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;white-space:nowrap;}
+.btn-export:hover{background:var(--lgreen);}
+.btn-add{background:var(--gold);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:700;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#f5f8f6;}
+th{padding:11px 14px;text-align:left;font-size:.72rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+td{padding:11px 14px;font-size:.84rem;border-top:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:#fafcfa;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap;}
+.b-pending{background:#e0e8ff;color:#2040a0;}.b-review{background:#fff3cd;color:#7d5a00;}.b-approved{background:#d1f0e0;color:#0a5c30;}.b-rejected{background:#fde0e0;color:#9a0000;}
+.b-ongoing{background:#fff3cd;color:#7d5a00;}.b-complete{background:#d1f0e0;color:#0a5c30;}.b-planning{background:#e0e8ff;color:#2040a0;}.b-stalled{background:#fde0e0;color:#9a0000;}
+.action-btns{display:flex;gap:5px;flex-wrap:wrap;}
+.btn-sm{padding:5px 11px;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-approve{background:#d1f0e0;color:#0a5c30;}.btn-review{background:#fff3cd;color:#7d5a00;}.btn-reject{background:#fde0e0;color:#9a0000;}.btn-view{background:#e8f0ff;color:#2040a0;}.btn-edit{background:#fff3cd;color:#7d5a00;}.btn-delete{background:#fde0e0;color:#9a0000;}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-top:1px solid var(--border);font-size:.8rem;color:var(--gray);}
+.page-btns{display:flex;gap:5px;}
+.page-btn{padding:5px 11px;border:1.5px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;}
+.page-btn:hover,.page-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9990;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+.modal-head{padding:20px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1;}
+.modal-head h3{font-family:'Playfair Display',serif;font-size:1.1rem;}
+.modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--gray);padding:4px 8px;border-radius:4px;}
+.modal-close:hover{background:var(--cream);}
+.modal-body{padding:26px;}
+.modal-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:#fff;}
+.mform-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mform-group{display:flex;flex-direction:column;gap:5px;}
+.mform-group.full{grid-column:1/-1;}
+.mform-group label{font-size:.8rem;font-weight:600;}
+.mform-group label .req{color:#cc2222;margin-left:2px;}
+.mform-group input,.mform-group select,.mform-group textarea{font-family:'DM Sans',sans-serif;font-size:.86rem;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--cream);outline:none;width:100%;}
+.mform-group input:focus,.mform-group select:focus,.mform-group textarea:focus{border-color:var(--green);background:#fff;}
+.mform-group textarea{resize:vertical;min-height:80px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:.85rem;gap:10px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-row .dk{color:var(--gray);font-weight:500;flex-shrink:0;min-width:120px;}
+.detail-row .dv{font-weight:600;text-align:right;}
+.approve-section{background:#e8f5ee;border-radius:10px;padding:18px;margin-top:18px;}
+.approve-section label{font-size:.82rem;font-weight:700;color:var(--green);display:block;margin-bottom:8px;}
+.approve-section input{font-family:'DM Sans',sans-serif;font-size:.92rem;padding:10px 14px;border:2px solid var(--green);border-radius:8px;background:#fff;outline:none;width:100%;}
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bar{flex:1;height:6px;background:#e8ede9;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;background:var(--green);}
+.prog-label{font-size:.75rem;color:var(--gray);white-space:nowrap;min-width:32px;}
+.empty-state{padding:44px;text-align:center;color:var(--gray);}
+.empty-state .ei{font-size:2.5rem;margin-bottom:10px;}
+.empty-state p{font-size:.88rem;}
+.dash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:9px;font-size:.86rem;font-weight:600;z-index:99999;opacity:0;transform:translateY(14px);transition:all .3s;pointer-events:none;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-left:4px solid #4caf50;}.toast.error{border-left:4px solid #e53935;}.toast.info{border-left:4px solid var(--gold);}
+@media(max-width:1100px){.stats-grid{grid-template-columns:1fr 1fr;}.dash-grid{grid-template-columns:1fr;}}
+@media(max-width:700px){.sidebar{width:52px;}.sidebar-logo h2,.sidebar-logo span,.nav-item span,.nav-section,.logout-btn span{display:none;}.nav-item{justify-content:center;padding:12px;}.stats-grid{grid-template-columns:1fr 1fr;}.mform-grid{grid-template-columns:1fr;}.mform-group.full{grid-column:1;}}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-emblem">ND</div>
+    <h2>CDF Staff Login</h2>
+    <p>Ndhiwa Constituency Admin Portal</p>
+    <input type="text" id="login-user" placeholder="Username" autocomplete="off"/>
+    <input type="password" id="login-pass" placeholder="Password"/>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-error" id="login-error">❌ Invalid username or password</div>
+    <div class="login-hint">Demo: <strong>admin</strong> / <strong>cdf2025</strong></div>
+  </div>
+</div>
+
+<div id="app">
+<div class="app-inner">
+  <div class="sidebar">
+    <div class="sidebar-logo"><h2>Ndhiwa CDF Admin</h2><span>Staff Portal</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <button class="nav-item active" onclick="showTab('dashboard',this)"><span>📊</span><span>Dashboard</span></button>
+      <button class="nav-item" onclick="showTab('applications',this)"><span>📋</span><span>Applications</span></button>
+      <button class="nav-item" onclick="showTab('approved',this)"><span>✅</span><span>Approved</span></button>
+      <div class="nav-section">Manage</div>
+      <button class="nav-item" onclick="showTab('projects',this)"><span>🏗️</span><span>Projects</span></button>
+      <button class="nav-item" onclick="showTab('messages',this)"><span>✉️</span><span>Messages</span></button>
+      <button class="nav-item" onclick="showTab('announcements',this)"><span>📢</span><span>Announcements</span></button>
+      <div class="nav-section">Export</div>
+      <button class="nav-item" onclick="exportDisbursementPDF()"><span>📄</span><span>Disbursement PDF</span></button>
+      <button class="nav-item" onclick="exportCSV()"><span>📊</span><span>Export CSV</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="doLogout()"><span>🚪</span><span>Logout</span></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="page-title">Dashboard Overview</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="admin-badge">🔐 <span id="admin-label">Admin</span></div>
+        <span style="font-size:.8rem;color:var(--gray);" id="today-date"></span>
+      </div>
+    </div>
+
+    <div id="page-content">
+
+      <!-- DASHBOARD -->
+      <div class="tab-page active" id="tab-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card green"><div class="sc-num" id="d-total">0</div><div class="sc-label">Total Applications</div><div class="sc-sub" style="color:var(--green);">2025 Cycle</div></div>
+          <div class="stat-card gold"><div class="sc-num" id="d-pending">0</div><div class="sc-label">Pending / Under Review</div><div class="sc-sub" style="color:var(--gold);">Awaiting action</div></div>
+          <div class="stat-card blue"><div class="sc-num" id="d-approved">0</div><div class="sc-label">Approved</div><div class="sc-sub" style="color:#4488cc;">Ready for disbursement</div></div>
+          <div class="stat-card red"><div class="sc-num" id="d-projects">0</div><div class="sc-label">Active Projects</div><div class="sc-sub" style="color:#e05050;">In constituency</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="table-wrap">
+            <div class="table-header"><h3>📋 Recent Applications</h3><button class="btn-export" onclick="showTab('applications',document.querySelectorAll('.nav-item')[1])">View All →</button></div>
+            <div id="recent-apps-body"></div>
+          </div>
+          <div class="table-wrap">
+            <div class="table-header"><h3>📊 Status Breakdown</h3></div>
+            <div style="padding:22px;" id="status-breakdown"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS -->
+      <div class="tab-page" id="tab-applications">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>📋 All Bursary Applications</h3>
+            <div class="table-actions">
+              <input class="tbl-search" id="app-search" placeholder="🔍 Name or Ref…" oninput="renderAppsTable()"/>
+              <select class="tbl-filter" id="app-filter-status" onchange="renderAppsTable()">
+                <option value="">All Status</option><option>Pending</option><option>Under Review</option><option>Approved</option><option>Not Approved</option>
+              </select>
+              <select class="tbl-filter" id="app-filter-ward" onchange="renderAppsTable()">
+                <option value="">All Wards</option><option>Kanyikela</option><option>Kanyadoto</option><option>Kwabwai</option><option>Kologi</option>
+              </select>
+              <button class="btn-export" onclick="exportCSV()">⬇ CSV</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Ref #</th><th>Student Name</th><th>Ward</th><th>Institution</th><th>Applied (KES)</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="apps-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pagination"><span id="app-count-label">—</span><div class="page-btns" id="app-pagination"></div></div>
+        </div>
+      </div>
+
+      <!-- APPROVED -->
+      <div class="tab-page" id="tab-approved">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>✅ Approved Applications</h3>
+            <div class="table-actions">
+              <button class="btn-export" onclick="exportDisbursementPDF()">📄 Disbursement PDF</button>
+              <button class="btn-export" style="background:var(--gold);color:var(--dark);" onclick="exportCSV('approved')">⬇ CSV</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Ref #</th><th>Student Name</th><th>Institution</th><th>Ward</th><th>Applied (KES)</th><th>Approved (KES)</th><th>Phone</th><th>Actions</th></tr></thead>
+              <tbody id="approved-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="tab-page" id="tab-projects">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>🏗️ Project Management</h3>
+            <button class="btn-add" onclick="openProjectModal(null)">+ Add New Project</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Project Name</th><th>Category</th><th>Ward</th><th>Budget (KES)</th><th>Progress</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="projects-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="tab-page" id="tab-messages">
+        <div class="table-wrap">
+          <div class="table-header"><h3>✉️ Contact Messages</h3></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Name</th><th>Phone</th><th>Subject</th><th>Message</th><th>Date</th><th>Action</th></tr></thead>
+              <tbody id="messages-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ANNOUNCEMENTS ══ -->
+      <div class="tab-page" id="tab-announcements">
+        <div class="table-wrap" style="margin-bottom:24px;">
+          <div class="table-header">
+            <h3>📢 Add New Announcement</h3>
+            <span style="font-size:.82rem;color:var(--gray);">Posts instantly to the public site</span>
+          </div>
+          <div style="padding:24px;">
+            <div class="mform-grid">
+              <div class="mform-group"><label>Title <span class="req">*</span></label><input type="text" id="ann-title" placeholder="e.g. 2025 Bursary Window Now Open"/></div>
+              <div class="mform-group"><label>Tag / Category</label>
+                <select id="ann-tag"><option>Notice</option><option>Bursary</option><option>Projects</option><option>Health</option><option>Community</option><option>Urgent</option></select>
+              </div>
+              <div class="mform-group full"><label>Message Body <span class="req">*</span></label><textarea id="ann-body" style="min-height:90px;" placeholder="Write the full announcement here…"></textarea></div>
+            </div>
+            <button class="btn-add" style="margin-top:14px;padding:10px 24px;font-size:.88rem;" onclick="addAnnouncement()">📢 Post Announcement to Public Site</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>📋 All Announcements</h3><span style="font-size:.82rem;color:var(--gray);">These show on the public homepage</span></div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Tag</th><th>Title</th><th>Message</th><th>Date Posted</th><th>Action</th></tr></thead>
+              <tbody id="ann-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BURSARY MODAL -->
+<div class="modal-overlay" id="bursary-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="bursary-modal-title">Application Details</h3>
+      <button class="modal-close" onclick="closeModal('bursary-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="bursary-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-review" style="padding:9px 18px;font-size:.84rem;" onclick="setBursaryStatus('Under Review')">🔎 Under Review</button>
+      <button class="btn-sm btn-approve" style="padding:9px 18px;font-size:.84rem;" onclick="setBursaryStatus('Approved')">✅ Approve</button>
+      <button class="btn-sm btn-reject" style="padding:9px 18px;font-size:.84rem;" onclick="setBursaryStatus('Not Approved')">❌ Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="project-modal-title">Add New Project</h3>
+      <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mform-grid">
+        <div class="mform-group full"><label>Project Name <span class="req">*</span></label><input type="text" id="p-name" placeholder="e.g. Ndhiwa Secondary Lab Block"/></div>
+        <div class="mform-group"><label>Category <span class="req">*</span></label>
+          <select id="p-cat"><option value="">Select…</option><option>Education</option><option>Roads & Infrastructure</option><option>Water & Sanitation</option><option>Health</option><option>Agriculture</option><option>Energy</option><option>Other</option></select>
+        </div>
+        <div class="mform-group"><label>Ward <span class="req">*</span></label>
+          <select id="p-ward"><option value="">Select…</option><option>Kanyikela</option><option>Kanyadoto</option><option>Kwabwai</option><option>Kologi</option><option>All Wards</option></select>
+        </div>
+        <div class="mform-group"><label>Budget (KES) <span class="req">*</span></label><input type="number" id="p-budget" placeholder="e.g. 4200000"/></div>
+        <div class="mform-group"><label>Contractor</label><input type="text" id="p-contractor" placeholder="Contractor name"/></div>
+        <div class="mform-group"><label>Start Date</label><input type="text" id="p-start" placeholder="e.g. Jan 2025"/></div>
+        <div class="mform-group"><label>Expected Completion</label><input type="text" id="p-end" placeholder="e.g. Jun 2025"/></div>
+        <div class="mform-group"><label>Progress (0–100%) <span class="req">*</span></label><input type="number" id="p-progress" min="0" max="100" placeholder="e.g. 72"/></div>
+        <div class="mform-group"><label>Status <span class="req">*</span></label>
+          <select id="p-status"><option value="">Select…</option><option>Planning</option><option>Ongoing</option><option>Complete</option><option>Stalled</option></select>
+        </div>
+        <div class="mform-group full"><label>Description</label><textarea id="p-desc" placeholder="Brief description…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" style="padding:9px 18px;font-size:.84rem;background:var(--cream);color:var(--dark);border:1.5px solid var(--border);" onclick="closeModal('project-modal')">Cancel</button>
+      <button class="btn-sm btn-approve" style="padding:9px 20px;font-size:.84rem;" onclick="saveProject()">💾 Save Project</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ── DATA LAYER ──
+function getData(key,fb){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fb;}catch{return fb;}}
+function saveData(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){console.error(e);}}
+
+function seedAll(){
+  if(!getData('cdf_projects',null)){
+    saveData('cdf_projects',[
+      {id:'p1',name:'Ndhiwa Secondary School Laboratory Block',cat:'Education',ward:'Kanyikela',budget:4200000,contractor:'BuildRight Ltd',start:'Jan 2025',end:'Jun 2025',progress:72,status:'Ongoing',desc:'Construction of a 4-classroom science lab block including equipment and furniture.'},
+      {id:'p2',name:'Kiambu Road B Tarmacking – 3.4km',cat:'Roads & Infrastructure',ward:'Kanyadoto',budget:9800000,contractor:'Tarmac Kenya Ltd',start:'Oct 2024',end:'Apr 2025',progress:80,status:'Ongoing',desc:'Tarmacking of main access road connecting the market centre to the health facility.'},
+      {id:'p3',name:'Mwangi Community Water Project',cat:'Water & Sanitation',ward:'Kwabwai',budget:6500000,contractor:'AquaWorks Ltd',start:'Jul 2024',end:'Jan 2025',progress:100,status:'Complete',desc:'Installation of 15km pipeline, 3 storage tanks, and 8 water kiosks.'},
+      {id:'p4',name:'Mwangi Health Centre Expansion',cat:'Health',ward:'Kologi',budget:12300000,contractor:'MedConstruct Ltd',start:'Mar 2025',end:'Aug 2025',progress:55,status:'Ongoing',desc:'Construction of maternity wing and male ward.'},
+      {id:'p5',name:'Farmers Irrigation Scheme – Phase 2',cat:'Agriculture',ward:'Kanyikela',budget:5100000,contractor:'AgriTech Kenya',start:'Sep 2024',end:'Dec 2024',progress:100,status:'Complete',desc:'Extension of drip irrigation to 120 additional acres.'},
+      {id:'p6',name:'Solar Street Lighting – 5 Market Centres',cat:'Energy',ward:'All Wards',budget:3800000,contractor:'SolarKenya Ltd',start:'Apr 2025',end:'Sep 2025',progress:15,status:'Planning',desc:'Installation of 80 solar street lights across 5 market centres.'},
+    ]);
+  }
+  const existingApps = getData('cdf_applications',null);
+  if(!existingApps||existingApps.length===0){
+    saveData('cdf_applications',[
+      {_id:'a1',ref:'ND-2025-00001',firstName:'Jane',lastName:'Wanjiku',ward:'Kanyikela',school:'Ndhiwa Girls Secondary',level:'Form 3 – Secondary',amountApplied:30000,amountApproved:15000,status:'Approved',phone:'0712345678',guardianName:'Samuel Wanjiku',submittedAt:'10 March 2025',idNo:'12345678',dob:'15/03/2008',gender:'Female',village:'Kiambu Village',admNo:'ADM/2023/045',fees:35000,income:'KES 5,001–15,000',guardianRel:'Father',guardianId:'23456789',notes:''},
+      {_id:'a2',ref:'ND-2025-00002',firstName:'Peter',lastName:'Otieno',ward:'Kanyadoto',school:'Kisumu Polytechnic',level:'TVET / Vocational',amountApplied:25000,amountApproved:'',status:'Pending',phone:'0722334455',guardianName:'Grace Otieno',submittedAt:'11 March 2025',idNo:'23456789',dob:'22/07/2006',gender:'Male',village:'Otieno Sub-location',admNo:'KP/2024/112',fees:28000,income:'Below KES 5,000',guardianRel:'Mother',guardianId:'34567890',notes:'Single parent household'},
+      {_id:'a3',ref:'ND-2025-00003',firstName:'Mary',lastName:'Kamau',ward:'Kwabwai',school:'University of Nairobi',level:'University / Tertiary',amountApplied:50000,amountApproved:'',status:'Under Review',phone:'0733445566',guardianName:'John Kamau',submittedAt:'12 March 2025',idNo:'34567890',dob:'05/11/2003',gender:'Female',village:'Ngara',admNo:'F19/12345/2022',fees:75000,income:'KES 15,001–30,000',guardianRel:'Father',guardianId:'45678901',notes:''},
+      {_id:'a4',ref:'ND-2025-00004',firstName:'David',lastName:'Kipchoge',ward:'Kologi',school:'Ndhiwa Boys High School',level:'Secondary – Form 4',amountApplied:35000,amountApproved:'',status:'Pending',phone:'0744556677',guardianName:'Rose Kipchoge',submittedAt:'13 March 2025',idNo:'45678901',dob:'30/01/2007',gender:'Male',village:'Kipchoge Estate',admNo:'XBH/2021/089',fees:40000,income:'KES 5,001–15,000',guardianRel:'Mother',guardianId:'56789012',notes:'Father deceased'},
+      {_id:'a5',ref:'ND-2025-00005',firstName:'Esther',lastName:'Muthoni',ward:'Kanyikela',school:'Ndhiwa Girls Secondary',level:'Secondary – Form 2',amountApplied:28000,amountApproved:12000,status:'Approved',phone:'0755667788',guardianName:'Paul Muthoni',submittedAt:'14 March 2025',idNo:'56789012',dob:'14/06/2009',gender:'Female',village:'Muthoni Estate',admNo:'XGS/2023/067',fees:32000,income:'Below KES 5,000',guardianRel:'Father',guardianId:'67890123',notes:'Orphan'},
+      {_id:'a6',ref:'ND-2025-00006',firstName:'Samuel',lastName:'Odhiambo',ward:'Kanyadoto',school:'Mombasa Technical',level:'TVET / Vocational',amountApplied:22000,amountApproved:'',status:'Not Approved',phone:'0766778899',guardianName:'Agnes Odhiambo',submittedAt:'15 March 2025',idNo:'67890123',dob:'18/09/2005',gender:'Male',village:'Odhiambo Lane',admNo:'MT/2024/203',fees:26000,income:'KES 15,001–30,000',guardianRel:'Mother',guardianId:'78901234',notes:''},
+    ]);
+  }
+  if(!getData('cdf_messages',null)){
+    saveData('cdf_messages',[
+      {id:'m1',name:'Alice Njeri',phone:'0700111222',email:'',subject:'Bursary Enquiry',message:'I would like to know when the bursary results for 2025 will be announced.',date:'16 March 2025',read:false},
+      {id:'m2',name:'James Omondi',phone:'0711223344',email:'jomondi@gmail.com',subject:'New Project Proposal',message:'Our village needs a water borehole. We have over 500 households without clean water access.',date:'17 March 2025',read:false},
+    ]);
+  }
+}
+
+// ── AUTH ──
+const USERS={admin:'cdf2025',manager:'cdf@office',staff:'staff123'};
+let currentUser=null, editBursaryId=null, editProjectId=null, appsPage=1;
+const PAGE_SIZE=12;
+
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value;
+  if(USERS[u]&&USERS[u]===p){
+    currentUser=u;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('admin-label').textContent=u.charAt(0).toUpperCase()+u.slice(1);
+    document.getElementById('today-date').textContent=new Date().toLocaleDateString('en-KE',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    seedAll(); refreshAll();
+    showToast('Welcome back, '+u+'! 👋','success');
+  } else {
+    const err=document.getElementById('login-error');
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',3000);
+  }
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── NAV ──
+const TITLES={dashboard:'Dashboard Overview',applications:'All Bursary Applications',approved:'Approved Applications',projects:'Project Management',messages:'Contact Messages',announcements:'Manage Announcements'};
+function showTab(id,btn){
+  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('page-title').textContent=TITLES[id]||id;
+}
+
+// ── TOAST ──
+function showToast(msg,type='info',dur=3200){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ── HELPERS ──
+function bc(s){return{Pending:'b-pending','Under Review':'b-review',Approved:'b-approved','Not Approved':'b-rejected'}[s]||'b-pending';}
+function bp(s){return{Ongoing:'b-ongoing',Complete:'b-complete',Planning:'b-planning',Stalled:'b-stalled'}[s]||'b-planning';}
+function kes(v){return'KES '+Number(v||0).toLocaleString();}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+function refreshAll(){renderDashboard();renderAppsTable();renderApprovedTable();renderProjectsTable();renderMessagesTable();renderAnnouncementsTable();}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  const apps=getData('cdf_applications',[]);
+  const projects=getData('cdf_projects',[]);
+  document.getElementById('d-total').textContent=apps.length;
+  document.getElementById('d-pending').textContent=apps.filter(a=>a.status==='Pending'||a.status==='Under Review').length;
+  document.getElementById('d-approved').textContent=apps.filter(a=>a.status==='Approved').length;
+  document.getElementById('d-projects').textContent=projects.length;
+  const recent=[...apps].reverse().slice(0,5);
+  document.getElementById('recent-apps-body').innerHTML=recent.length?`<table><thead><tr><th>Ref</th><th>Name</th><th>Status</th></tr></thead><tbody>${recent.map(a=>`<tr><td style="font-size:.76rem;color:var(--green);font-weight:600;">${a.ref||'—'}</td><td>${a.firstName} ${a.lastName}</td><td><span class="badge ${bc(a.status)}">${a.status}</span></td></tr>`).join('')}</tbody></table>`:'<div class="empty-state"><div class="ei">📭</div><p>No applications yet</p></div>';
+  const statuses=['Pending','Under Review','Approved','Not Approved'];
+  const colors=['#4466cc','#c9960f','#0a6b3e','#c0392b'];
+  const total=apps.length||1;
+  document.getElementById('status-breakdown').innerHTML=statuses.map((s,i)=>{
+    const count=apps.filter(a=>a.status===s).length;
+    const pct=Math.round(count/total*100);
+    return`<div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:5px;"><span style="font-weight:600;">${s}</span><span style="color:var(--gray);">${count} (${pct}%)</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${colors[i]};"></div></div></div>`;
+  }).join('');
+}
+
+// ── APPLICATIONS TABLE ──
+function renderAppsTable(){
+  let apps=getData('cdf_applications',[]);
+  const search=(document.getElementById('app-search')?.value||'').toLowerCase();
+  const sf=document.getElementById('app-filter-status')?.value||'';
+  const wf=document.getElementById('app-filter-ward')?.value||'';
+  apps=[...apps].reverse().filter(a=>{
+    const name=(a.firstName+' '+a.lastName).toLowerCase();
+    const ref=(a.ref||'').toLowerCase();
+    return(!search||name.includes(search)||ref.includes(search))&&(!sf||a.status===sf)&&(!wf||a.ward===wf);
+  });
+  const totalPages=Math.ceil(apps.length/PAGE_SIZE)||1;
+  if(appsPage>totalPages)appsPage=1;
+  const page=apps.slice((appsPage-1)*PAGE_SIZE,appsPage*PAGE_SIZE);
+  document.getElementById('apps-tbody').innerHTML=page.length?page.map(a=>`
+    <tr>
+      <td style="font-size:.76rem;font-weight:700;color:var(--green);">${a.ref||'—'}</td>
+      <td style="font-weight:600;">${a.firstName||''} ${a.lastName||''}</td>
+      <td>${a.ward||'—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.school||'—'}</td>
+      <td>${kes(a.amountApplied)}</td>
+      <td><span class="badge ${bc(a.status)}">${a.status||'Pending'}</span></td>
+      <td style="font-size:.76rem;color:var(--gray);">${a.submittedAt||'—'}</td>
+      <td><div class="action-btns">
+        <button class="btn-sm btn-view" onclick="openBursaryModal('${a._id}')">👁 View</button>
+        <button class="btn-sm btn-approve" onclick="quickApprove('${a._id}')">✓ Approve</button>
+        <button class="btn-sm btn-reject" onclick="quickReject('${a._id}')">✗ Reject</button>
+      </div></td>
+    </tr>`).join(''):'<tr><td colspan="8"><div class="empty-state"><div class="ei">🔍</div><p>No matching applications</p></div></td></tr>';
+  document.getElementById('app-count-label').textContent=`${apps.length} record${apps.length!==1?'s':''}`;
+  document.getElementById('app-pagination').innerHTML=Array.from({length:totalPages},(_,i)=>`<button class="page-btn ${i+1===appsPage?'active':''}" onclick="appsPage=${i+1};renderAppsTable()">${i+1}</button>`).join('');
+}
+
+function quickApprove(id){openBursaryModal(id);showToast('Enter the approved amount below, then click ✅ Approve','info',5000);}
+function quickReject(id){
+  if(!confirm('Mark this application as "Not Approved"?'))return;
+  const apps=getData('cdf_applications',[]);
+  const idx=apps.findIndex(a=>a._id===id);
+  if(idx===-1)return;
+  apps[idx].status='Not Approved';
+  saveData('cdf_applications',apps);
+  refreshAll();
+  showToast('Application marked as Not Approved','error');
+}
+
+// ── BURSARY MODAL ──
+function openBursaryModal(id){
+  const apps=getData('cdf_applications',[]);
+  const a=apps.find(x=>x._id===id);
+  if(!a)return;
+  editBursaryId=id;
+  document.getElementById('bursary-modal-title').textContent=`Application: ${a.ref||id}`;
+  document.getElementById('bursary-modal-body').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid var(--border);">
+      <span class="badge ${bc(a.status)}" style="font-size:.82rem;padding:5px 14px;">${a.status}</span>
+      <span style="font-size:.76rem;color:var(--gray);">Submitted: ${a.submittedAt||'—'}</span>
+    </div>
+    ${[['Ref',a.ref],['Full Name',`${a.firstName} ${a.lastName}`],['Date of Birth',a.dob],['ID / Cert No.',a.idNo],['Gender',a.gender],['Ward',a.ward],['Village',a.village],['Level',a.level],['Institution',a.school],['Adm. Number',a.admNo],['Annual Fees',kes(a.fees)],['Amount Applied',kes(a.amountApplied)],['Guardian Name',a.guardianName],['Relationship',a.guardianRel],['Guardian Phone',a.phone],['Income Range',a.income||'—']].map(([k,v])=>`<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v||'—'}</span></div>`).join('')}
+    ${a.notes?`<div style="margin-top:10px;background:#fff8e0;border-radius:8px;padding:10px 14px;font-size:.82rem;color:#7d5a00;"><strong>📝 Notes:</strong> ${a.notes}</div>`:''}
+    <div class="approve-section">
+      <label>💰 Approved Amount (KES) — set this before clicking Approve</label>
+      <input type="number" id="modal-amt" value="${a.amountApproved||''}" placeholder="Enter amount e.g. 15000"/>
+    </div>`;
+  document.getElementById('bursary-modal').classList.add('open');
+}
+
+function setBursaryStatus(status){
+  const apps=getData('cdf_applications',[]);
+  const idx=apps.findIndex(a=>a._id===editBursaryId);
+  if(idx===-1)return;
+  const amt=document.getElementById('modal-amt')?.value||'';
+  if(status==='Approved'&&!amt){showToast('⚠️ Please enter the approved amount first','error');return;}
+  apps[idx].status=status;
+  if(amt)apps[idx].amountApproved=amt;
+  saveData('cdf_applications',apps);
+  closeModal('bursary-modal');
+  refreshAll();
+  showToast(`✅ Status updated to "${status}"`,status==='Approved'?'success':status==='Not Approved'?'error':'info');
+}
+
+// ── APPROVED TABLE ──
+function renderApprovedTable(){
+  const apps=getData('cdf_applications',[]).filter(a=>a.status==='Approved');
+  const total=apps.reduce((s,a)=>s+Number(a.amountApproved||0),0);
+  document.getElementById('approved-tbody').innerHTML=apps.length?[
+    ...apps.map(a=>`<tr>
+      <td style="font-size:.76rem;font-weight:700;color:var(--green);">${a.ref||'—'}</td>
+      <td style="font-weight:600;">${a.firstName} ${a.lastName}</td>
+      <td>${a.school||'—'}</td><td>${a.ward||'—'}</td>
+      <td>${kes(a.amountApplied)}</td>
+      <td style="font-weight:700;color:var(--green);">${kes(a.amountApproved)}</td>
+      <td>${a.phone||'—'}</td>
+      <td><button class="btn-sm btn-edit" onclick="openBursaryModal('${a._id}')">✏️ Edit</button></td>
+    </tr>`),
+    `<tr style="background:#f0f9f4;"><td colspan="5" style="font-weight:700;text-align:right;padding:12px 14px;color:var(--dark);">TOTAL APPROVED:</td><td style="font-weight:800;color:var(--green);font-size:.95rem;">${kes(total)}</td><td colspan="2"></td></tr>`
+  ].join(''):'<tr><td colspan="8"><div class="empty-state"><div class="ei">✅</div><p>No approved applications yet.<br>Go to Applications tab and approve some.</p></div></td></tr>';
+}
+
+// ── PROJECTS TABLE ──
+function renderProjectsTable(){
+  const projects=getData('cdf_projects',[]);
+  document.getElementById('projects-tbody').innerHTML=projects.length?projects.map(p=>`
+    <tr>
+      <td style="font-weight:600;max-width:180px;">${p.name}</td>
+      <td><span style="font-size:.76rem;background:#e8f5ee;color:var(--green);padding:2px 8px;border-radius:10px;font-weight:600;">${p.cat}</span></td>
+      <td>${p.ward}</td>
+      <td>KES ${Number(p.budget||0).toLocaleString()}</td>
+      <td style="min-width:120px;"><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${Math.min(p.progress||0,100)}%;background:${p.progress>=100?'#4488cc':p.status==='Stalled'?'#e05050':'var(--green)'};"></div></div><span class="prog-label">${p.progress||0}%</span></div></td>
+      <td><span class="badge ${bp(p.status)}">${p.status}</span></td>
+      <td><div class="action-btns">
+        <button class="btn-sm btn-edit" onclick="openProjectModal('${p.id}')">✏️ Edit</button>
+        <button class="btn-sm btn-delete" onclick="deleteProject('${p.id}')">🗑 Delete</button>
+      </div></td>
+    </tr>`).join(''):'<tr><td colspan="7"><div class="empty-state"><div class="ei">🏗️</div><p>No projects yet. Click "+ Add New Project".</p></div></td></tr>';
+}
+
+// ── PROJECT MODAL ──
+function openProjectModal(id){
+  editProjectId=id||null;
+  document.getElementById('project-modal-title').textContent=id?'✏️ Edit Project':'➕ Add New Project';
+  if(id){
+    const p=getData('cdf_projects',[]).find(x=>x.id===id);
+    if(!p)return;
+    document.getElementById('p-name').value=p.name||'';
+    document.getElementById('p-cat').value=p.cat||'';
+    document.getElementById('p-ward').value=p.ward||'';
+    document.getElementById('p-budget').value=p.budget||'';
+    document.getElementById('p-contractor').value=p.contractor||'';
+    document.getElementById('p-start').value=p.start||'';
+    document.getElementById('p-end').value=p.end||'';
+    document.getElementById('p-progress').value=p.progress||'';
+    document.getElementById('p-status').value=p.status||'';
+    document.getElementById('p-desc').value=p.desc||'';
+  } else {
+    ['p-name','p-budget','p-contractor','p-start','p-end','p-progress','p-desc'].forEach(i=>document.getElementById(i).value='');
+    ['p-cat','p-ward','p-status'].forEach(i=>document.getElementById(i).value='');
+  }
+  document.getElementById('project-modal').classList.add('open');
+}
+
+function saveProject(){
+  const name=document.getElementById('p-name').value.trim();
+  const cat=document.getElementById('p-cat').value;
+  const ward=document.getElementById('p-ward').value;
+  const budget=document.getElementById('p-budget').value;
+  const progress=document.getElementById('p-progress').value;
+  const status=document.getElementById('p-status').value;
+  if(!name||!cat||!ward||!budget||progress===''||!status){showToast('⚠️ Fill in all required (*) fields','error');return;}
+  const projects=getData('cdf_projects',[]);
+  const data={id:editProjectId||genId(),name,cat,ward,budget:Number(budget),contractor:document.getElementById('p-contractor').value.trim(),start:document.getElementById('p-start').value.trim(),end:document.getElementById('p-end').value.trim(),progress:Number(progress),status,desc:document.getElementById('p-desc').value.trim()};
+  if(editProjectId){
+    const idx=projects.findIndex(p=>p.id===editProjectId);
+    if(idx!==-1)projects[idx]=data;
+    showToast('✅ Project updated!','success');
+  } else {
+    projects.push(data);
+    showToast('✅ New project added!','success');
+  }
+  saveData('cdf_projects',projects);
+  closeModal('project-modal');
+  renderProjectsTable();
+  renderDashboard();
+}
+
+function deleteProject(id){
+  if(!confirm('Delete this project? This cannot be undone.'))return;
+  saveData('cdf_projects',getData('cdf_projects',[]).filter(p=>p.id!==id));
+  renderProjectsTable();renderDashboard();
+  showToast('🗑 Project deleted','info');
+}
+
+// ── ANNOUNCEMENTS ──
+function addAnnouncement() {
+  const title = document.getElementById('ann-title').value.trim();
+  const body = document.getElementById('ann-body').value.trim();
+  const tag = document.getElementById('ann-tag').value;
+  if (!title || !body) { showToast('⚠️ Please fill in title and message', 'error'); return; }
+  const items = getData('cdf_announcements', []);
+  items.push({
+    id: 'ann-' + Date.now(), title, body, tag,
+    date: new Date().toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' })
+  });
+  saveData('cdf_announcements', items);
+  document.getElementById('ann-title').value = '';
+  document.getElementById('ann-body').value = '';
+  renderAnnouncementsTable();
+  showToast('📢 Announcement posted to public site!', 'success');
+}
+
+function deleteAnnouncement(id) {
+  if (!confirm('Delete this announcement from the public site?')) return;
+  saveData('cdf_announcements', getData('cdf_announcements', []).filter(a => a.id !== id));
+  renderAnnouncementsTable();
+  showToast('🗑 Announcement deleted', 'info');
+}
+
+function renderAnnouncementsTable() {
+  const items = getData('cdf_announcements', []);
+  const tbody = document.getElementById('ann-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = items.length ? [...items].reverse().map(a => `
+    <tr>
+      <td><span style="background:#e8f5ee;color:var(--green);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:10px;">${a.tag}</span></td>
+      <td style="font-weight:600;max-width:180px;">${a.title}</td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;color:var(--gray);">${a.body}</td>
+      <td style="font-size:.78rem;color:var(--gray);">${a.date}</td>
+      <td><button class="btn-sm btn-delete" onclick="deleteAnnouncement('${a.id}')">🗑 Delete</button></td>
+    </tr>`).join('')
+    : '<tr><td colspan="5"><div class="empty-state"><div class="ei">📢</div><p>No announcements yet. Add one above.</p></div></td></tr>';
+}
+
+function renderMessagesTable(){
+  const msgs=getData('cdf_messages',[]);
+  document.getElementById('messages-tbody').innerHTML=msgs.length?msgs.map(m=>`
+    <tr style="${!m.read?'font-weight:600;background:#fffef0;':''}">
+      <td>${m.name||'—'}</td><td>${m.phone||'—'}</td><td>${m.subject||'—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.message||'—'}</td>
+      <td style="font-size:.76rem;color:var(--gray);">${m.date||'—'}</td>
+      <td><button class="btn-sm btn-view" onclick="readMsg('${m.id}')">📖 Read</button></td>
+    </tr>`).join(''):'<tr><td colspan="6"><div class="empty-state"><div class="ei">📭</div><p>No messages yet</p></div></td></tr>';
+}
+function readMsg(id){
+  const msgs=getData('cdf_messages',[]);
+  const m=msgs.find(x=>x.id===id);
+  if(!m)return;
+  alert(`From: ${m.name}\nPhone: ${m.phone}\nSubject: ${m.subject}\n\n${m.message}`);
+  const idx=msgs.findIndex(x=>x.id===id);
+  msgs[idx].read=true;
+  saveData('cdf_messages',msgs);
+  renderMessagesTable();
+}
+
+// ── MODALS ──
+function closeModal(id){document.getElementById(id).classList.remove('open');editBursaryId=null;editProjectId=null;}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id);}));
+
+// ── EXPORT CSV ──
+function exportCSV(filter){
+  const apps=getData('cdf_applications',[]);
+  const data=filter==='approved'?apps.filter(a=>a.status==='Approved'):apps;
+  const headers=['Ref','First Name','Last Name','Ward','Institution','Level','Amount Applied','Amount Approved','Status','Phone','Submitted'];
+  const rows=data.map(a=>[a.ref,a.firstName,a.lastName,a.ward,a.school,a.level,a.amountApplied,a.amountApproved||'',a.status,a.phone,a.submittedAt]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`Ndhiwa_CDF_${filter||'All'}_${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);
+  showToast('📊 CSV exported!','success');
+}
+
+// ── EXPORT DISBURSEMENT PDF ──
+function exportDisbursementPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF('l','mm','a4');
+  const apps=getData('cdf_applications',[]).filter(a=>a.status==='Approved');
+  const total=apps.reduce((s,a)=>s+Number(a.amountApproved||0),0);
+  doc.setFillColor(10,107,62);doc.rect(0,0,297,30,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(15);doc.setFont('helvetica','bold');
+  doc.text('Ndhiwa Constituency CDF – Bursary Disbursement List 2025',148,14,{align:'center'});
+  doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text(`Generated: ${new Date().toLocaleDateString('en-KE')}   |   Approved: ${apps.length} students   |   Total: KES ${total.toLocaleString()}`,148,23,{align:'center'});
+  doc.autoTable({startY:36,head:[['#','Ref #','Student Name','Ward','Institution','Level','Applied (KES)','Approved (KES)','Phone']],body:apps.map((a,i)=>[i+1,a.ref||'—',`${a.firstName} ${a.lastName}`,a.ward||'—',a.school||'—',a.level||'—',Number(a.amountApplied||0).toLocaleString(),Number(a.amountApproved||0).toLocaleString(),a.phone||'—']),headStyles:{fillColor:[10,107,62],textColor:255,fontSize:8,fontStyle:'bold'},bodyStyles:{fontSize:7.5},alternateRowStyles:{fillColor:[245,250,247]}});
+  const fy=doc.lastAutoTable.finalY+22;
+  [['CDF Manager',20],['Committee Chairperson',110],['Date',210]].forEach(([label,x])=>{doc.setTextColor(50,50,50);doc.setFontSize(10);doc.text('_______________________',x,fy);doc.text(label,x,fy+8);});
+  doc.save(`Ndhiwa_CDF_Disbursement_${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast('📄 Disbursement PDF exported!','success');
+}
+</script>
+</body>
+</html>
